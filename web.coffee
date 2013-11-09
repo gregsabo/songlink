@@ -1,5 +1,6 @@
 express = require("express")
 _ = require "Underscore"
+Q = require 'q'
 request = require("request")
 url = require('url')
 fs = require("fs")
@@ -61,15 +62,39 @@ app.get('/api/songInfo/:id', (req, res) ->
             if tr.catalog == "spotify-WW"
                 outSong.spotify_id = tr.foreign_id.split(':')[2]
 
+        rdio_def = Q.defer()
         if outSong.rdio_id
             rdio.getTrack(outSong.rdio_id, (err, track) ->
                 if err
                     res.status(500)
                     return
-                console.log "got track", track
-                outSong.rdio_track = _(track).values()[0]
-                res.end(JSON.stringify(outSong))
+                rdio_def.resolve(_(track).values()[0])
+                #outSong.rdio_track = _(track).values()[0]
+                #res.end(JSON.stringify(outSong))
             )
+        else
+            rdio_def.resolve()
+
+        spot_def = Q.defer()
+        if outSong.spotify_id
+            request.get("http://ws.spotify.com/lookup/1/.json?uri=spotify:track:#{outSong.spotify_id}", (err, track) ->
+                if err
+                    console.log "spotify err"
+                    return
+                spot_def.resolve(JSON.parse(track.body).track)
+            )
+        else
+            spot_def.resolve()
+
+        Q.all([rdio_def.promise, spot_def.promise]).spread( (rdioTrack, spotifyTrack) ->
+            outSong.rdio_track = rdioTrack
+            outSong.spotify_track = spotifyTrack
+            console.log "ending with", outSong
+            
+            res.end(JSON.stringify(outSong))
+        )
+
+
     )
 )
 

@@ -3,16 +3,20 @@
     <div class='row-fluid'>
         {{#if rdio_track }}
             <div class='span6'>
-                <img src="{{rdio_track.icon}}"></img>
+                <img src="{{rdio_track.icon}}" style='float: right;'></img>
             </div>
         {{/if}}
         <div class='span6'>
-            {{#if title}}
-                <h3>{{title}}</h3>
-            {{/if}}
-            {{#if artist_name}}
-                <h4>by {{artist_name}}</h4>
-            {{/if}}
+            <div class='row-fluid'>
+                {{#if title}}
+                    <h3>{{title}}</h3>
+                {{/if}}
+                {{#if artist_name}}
+                    <h4>by {{artist_name}}</h4>
+                {{/if}}
+                <a href="http://rdio.com{{rdio_track.url}}" class='btn btn-info rdio-open'>Open in Rdio</a>
+                <a href="{{spotify_track.href}}" class='btn btn-success spotify-open'>Open in Spotify</a>
+            </div>
         </div>
     </div>
 </div>
