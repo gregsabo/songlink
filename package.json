@@ -7,7 +7,10 @@
     "mongoose": "~3.6.13",
     "passport-twitter": "~0.1.5",
     "passport": "~0.1.17",
-    "node-rdio": "~0.1.1"
+    "rdio": "~1.0.1",
+    "Underscore": "~1.5.2",
+    "request": "~2.27.0",
+    "url": "~0.7.9"
   },
   "engines": {
     "node": "0.10.x",

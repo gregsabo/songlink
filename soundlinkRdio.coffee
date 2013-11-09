@@ -1,5 +1,16 @@
-rdio = require('rdio')(
-    rdio_api_key: rdio_api_key,
-    rdio_api_shared: rdio_api_shared,
-    callback_url: "localhost:5000/oauth/callback"
-)
+_ = require("Underscore")
+Rdio = require('./contrib/rdio')
+rdio = new Rdio([process.env.RDIO_KEY, process.env.RDIO_SHARED_SECRET])
+
+module.exports =
+    getTrackId: (url, callback) ->
+        shortCode = url.match("http://rd.io/x/(.*)/")[1]
+        console.log "shortcode", shortCode
+        
+        rdio.call('getObjectFromShortCode', {'short_code': shortCode}, (err, res) ->
+            if err
+                console.log "rdio err", err
+                callback(err, null)
+                return
+            callback(null, "rdio-US:track:#{res.result.key}")
+        )
