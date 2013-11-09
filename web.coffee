@@ -1,4 +1,5 @@
 express = require("express")
+_ = require "Underscore"
 request = require("request")
 url = require('url')
 fs = require("fs")
@@ -36,6 +37,39 @@ app.get('/api/findSong', (req, res) ->
                 return
             res.end(JSON.parse(song.body).response.songs[0].id)
         )
+    )
+)
+
+app.get('/api/songInfo/:id', (req, res) ->
+    sid = req.params.id
+    api_key = process.env.SONGLINK_ECHO_NEST_API_KEY
+    console.log("http://developer.echonest.com/api/v4/song/profile?api_key=#{api_key}&format=json&id=#{sid}")
+    request.get("http://developer.echonest.com/api/v4/song/profile?api_key=#{api_key}&format=json&id=#{sid}&bucket=tracks&bucket=id:rdio-US&bucket=id:spotify-WW", (err, song) ->
+        if err
+            res.status(500)
+            return
+        
+        song = JSON.parse(song.body).response.songs[0]
+        outSong =
+            title: song.title
+            id: song.id
+            artist_name: song.artist_name
+
+        for tr in song.tracks
+            if tr.catalog == "rdio-US"
+                outSong.rdio_id = tr.foreign_id.split(':')[2]
+            if tr.catalog == "spotify-WW"
+                outSong.spotify_id = tr.foreign_id.split(':')[2]
+
+        if outSong.rdio_id
+            rdio.getTrack(outSong.rdio_id, (err, track) ->
+                if err
+                    res.status(500)
+                    return
+                console.log "got track", track
+                outSong.rdio_track = _(track).values()[0]
+                res.end(JSON.stringify(outSong))
+            )
     )
 )
 

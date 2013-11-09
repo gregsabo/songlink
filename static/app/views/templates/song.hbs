@@ -1,0 +1,18 @@
+<!-- .song -->
+<div class='row-fluid band pinkband'>
+    <div class='row-fluid'>
+        {{#if rdio_track }}
+            <div class='span6'>
+                <img src="{{rdio_track.icon}}"></img>
+            </div>
+        {{/if}}
+        <div class='span6'>
+            {{#if title}}
+                <h3>{{title}}</h3>
+            {{/if}}
+            {{#if artist_name}}
+                <h4>by {{artist_name}}</h4>
+            {{/if}}
+        </div>
+    </div>
+</div>

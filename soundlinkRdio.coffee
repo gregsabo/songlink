@@ -14,3 +14,12 @@ module.exports =
                 return
             callback(null, "rdio-US:track:#{res.result.key}")
         )
+
+    getTrack: (tid, callback) ->
+        rdio.call('get', {'keys': tid}, (err, res) ->
+            if err
+                console.log "rdio err", err
+                callback(err, null)
+                return
+            callback(null, res.result)
+        )

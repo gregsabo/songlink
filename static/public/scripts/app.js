@@ -90,28 +90,7 @@
   globals.require.list = list;
   globals.require.brunch = true;
 })();
-require.register("collections/Counters", function(exports, require, module) {
-var CountersCollection, _ref,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-module.exports = CountersCollection = (function(_super) {
-  __extends(CountersCollection, _super);
-
-  function CountersCollection() {
-    _ref = CountersCollection.__super__.constructor.apply(this, arguments);
-    return _ref;
-  }
-
-  CountersCollection.prototype.model = require('models/Counters');
-
-  return CountersCollection;
-
-})(Backbone.Collection);
-
-});
-
-;require.register("initialize", function(exports, require, module) {
+require.register("initialize", function(exports, require, module) {
 require('lib/helpers');
 
 require('routers/main');
@@ -126,25 +105,6 @@ $(function() {
 
 ;require.register("lib/helpers", function(exports, require, module) {
 Swag.Config.partialsPath = '../views/templates/';
-
-});
-
-;require.register("models/Counter", function(exports, require, module) {
-var CounterModel, _ref,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-module.exports = CounterModel = (function(_super) {
-  __extends(CounterModel, _super);
-
-  function CounterModel() {
-    _ref = CounterModel.__super__.constructor.apply(this, arguments);
-    return _ref;
-  }
-
-  return CounterModel;
-
-})(Backbone.Model);
 
 });
 
@@ -167,12 +127,39 @@ module.exports = HomeModel = (function(_super) {
 
 });
 
+;require.register("models/song", function(exports, require, module) {
+var Song, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+module.exports = Song = (function(_super) {
+  __extends(Song, _super);
+
+  function Song() {
+    _ref = Song.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  Song.prototype.url = function() {
+    return "/api/songInfo/" + (this.get('id'));
+  };
+
+  return Song;
+
+})(Backbone.Model);
+
+});
+
 ;require.register("routers/main", function(exports, require, module) {
-var HomeView, MainRouter, activateView, main, _ref,
+var HomeView, MainRouter, Song, SongView, activateView, main, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 HomeView = require("../views/home");
+
+Song = require("../models/song");
+
+SongView = require("../views/song");
 
 activateView = function(ViewCls) {
   var homeView;
@@ -189,12 +176,23 @@ MainRouter = (function(_super) {
   }
 
   MainRouter.prototype.routes = {
-    '': "home",
-    'counters/new': 'createCounter'
+    'song/:sid': "song",
+    '': "home"
   };
 
   MainRouter.prototype.home = function() {
     return activateView(HomeView);
+  };
+
+  MainRouter.prototype.song = function(sid) {
+    var song, songView;
+    song = new Song({
+      id: sid
+    });
+    songView = new SongView({
+      model: song
+    }).render();
+    return $("section.app").empty().append(songView.el);
   };
 
   MainRouter.prototype.createCounter = function() {
@@ -246,11 +244,43 @@ module.exports = HomeView = (function(_super) {
     return $.get("/api/findSong", {
       originalLink: originalLink
     }).done(function(res) {
-      return console.log("res was", res);
+      return window.location.href = "/song/" + res;
     });
   };
 
   return HomeView;
+
+})(Backbone.View);
+
+});
+
+;require.register("views/song", function(exports, require, module) {
+var SongView, _ref,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+module.exports = SongView = (function(_super) {
+  __extends(SongView, _super);
+
+  function SongView() {
+    _ref = SongView.__super__.constructor.apply(this, arguments);
+    return _ref;
+  }
+
+  SongView.prototype.template = require('views/templates/song');
+
+  SongView.prototype.initialize = function() {
+    this.listenTo(this.model, "sync", this.render, this);
+    return this.model.fetch();
+  };
+
+  SongView.prototype.render = function() {
+    console.log("rendering", this.model.attributes);
+    this.$el.html(this.template(this.model.attributes));
+    return this;
+  };
+
+  return SongView;
 
 })(Backbone.View);
 
@@ -264,6 +294,57 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 
 
   return "<!-- .home -->\n<div class='row-fluid band pinkband'>\n    <div class='row-fluid'>\n        <h3>Enter a URL for a Song:</h3>\n        <input type=\"text\"></input>\n        <div class='btn btn-primary btn-large' style='margin-top: 30px'>Create Link</div>\n    </div>\n</div>\n";
+  });
+});
+
+;require.register("views/templates/song", function(exports, require, module) {
+module.exports = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  var buffer = "", stack1, functionType="function", escapeExpression=this.escapeExpression, self=this;
+
+function program1(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n            <div class='span6'>\n                <img src=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.rdio_track),stack1 == null || stack1 === false ? stack1 : stack1.icon)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\"></img>\n            </div>\n        ";
+  return buffer;
+  }
+
+function program3(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n                <h3>";
+  if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</h3>\n            ";
+  return buffer;
+  }
+
+function program5(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n                <h4>by ";
+  if (stack1 = helpers.artist_name) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.artist_name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</h4>\n            ";
+  return buffer;
+  }
+
+  buffer += "<!-- .song -->\n<div class='row-fluid band pinkband'>\n    <div class='row-fluid'>\n        ";
+  stack1 = helpers['if'].call(depth0, depth0.rdio_track, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n        <div class='span6'>\n            ";
+  stack1 = helpers['if'].call(depth0, depth0.title, {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n            ";
+  stack1 = helpers['if'].call(depth0, depth0.artist_name, {hash:{},inverse:self.noop,fn:self.program(5, program5, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n        </div>\n    </div>\n</div>\n";
+  return buffer;
   });
 });
 

@@ -14,8 +14,7 @@ module.exports = class HomeView extends Backbone.View
         originalLink = @$el.find("input").val()
         console.log "requesting", originalLink
         $.get("/api/findSong", originalLink: originalLink).done( (res) ->
-            console.log "res was", res
-            
+            window.location.href = "/song/#{res}"
         )
         
 
