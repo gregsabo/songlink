@@ -48,6 +48,7 @@ module.exports = class SongView extends Backbone.View
             return
         if pref == "spotify"
             window.location.href = ctx.spotify_track.href
+            @$(".redirect-notify h3").text("Redirect Complete.")
             return
             
     rememberRdio: ->

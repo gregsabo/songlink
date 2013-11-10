@@ -231,17 +231,26 @@ module.exports = HomeView = (function(_super) {
   HomeView.prototype.template = require('views/templates/home');
 
   HomeView.prototype.render = function() {
+    var _this = this;
     this.$el.html(this.template());
+    setTimeout(function() {
+      return _this.$("input").focus();
+    }, 500);
     return this;
   };
 
   HomeView.prototype.events = {
-    "click .btn-primary": "requestLink"
+    "click .btn-primary": "requestLink",
+    "submit form": "requestLink"
   };
 
-  HomeView.prototype.requestLink = function() {
+  HomeView.prototype.requestLink = function(e) {
     var originalLink;
+    e.preventDefault();
     originalLink = this.$el.find("input").val();
+    if (originalLink.length === 0) {
+      return;
+    }
     console.log("requesting", originalLink);
     return $.get("/api/findSong", {
       originalLink: originalLink
@@ -330,6 +339,7 @@ module.exports = SongView = (function(_super) {
     }
     if (pref === "spotify") {
       window.location.href = ctx.spotify_track.href;
+      this.$(".redirect-notify h3").text("Redirect Complete.");
     }
   };
 
@@ -362,7 +372,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<!-- .home -->\n<div class='row-fluid band pinkband'>\n    <div class='row-fluid'>\n        <h4>Enter a URL for a Song:</h4>\n        <div class='row-fluid'>\n            <input type=\"text\"></input>\n            <div class='btn btn-primary btn-large' style='margin-top: 30px'>Create Link</div>\n        </div>\n    </div>\n</div>\n";
+  return "<!-- .home -->\n<div class='row-fluid band pinkband'>\n    <div class='row-fluid'>\n        <h4>Enter a URL for a Song:</h4>\n        <div class='row-fluid'>\n            <form class='song-url-form'>\n                <input type=\"text\"></input>\n            </form>\n            <div class='btn btn-primary btn-large' style='margin-top: 30px'>Create Link</div>\n        </div>\n    </div>\n</div>\n";
   });
 });
 
@@ -423,7 +433,7 @@ function program9(depth0,data) {
   if (stack1 = helpers.rdio_link) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.rdio_link; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "\" class='btn btn-info rdio-open' style='margin-bottom: 20px;'>Open in Rdio</a>\n                        ";
+    + "\" class='btn btn-lg btn-info rdio-open' style='margin-bottom: 20px;'>Open in Rdio</a>\n                        ";
   return buffer;
   }
 
@@ -432,7 +442,7 @@ function program11(depth0,data) {
   var buffer = "", stack1;
   buffer += "\n                            <a href=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.spotify_track),stack1 == null || stack1 === false ? stack1 : stack1.href)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" class='btn btn-success spotify-open' style='margin-bottom: 20px'>Open in Spotify</a>\n                        ";
+    + "\" class='btn btn-lg btn-success spotify-open' style='margin-bottom: 20px'>Open in Spotify</a>\n                        ";
   return buffer;
   }
 
