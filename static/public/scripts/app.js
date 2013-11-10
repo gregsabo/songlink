@@ -230,6 +230,10 @@ module.exports = HomeView = (function(_super) {
 
   HomeView.prototype.template = require('views/templates/home');
 
+  HomeView.prototype.initialize = function() {
+    return this.disabled = false;
+  };
+
   HomeView.prototype.render = function() {
     var _this = this;
     this.$el.html(this.template());
@@ -245,17 +249,29 @@ module.exports = HomeView = (function(_super) {
   };
 
   HomeView.prototype.requestLink = function(e) {
-    var originalLink;
+    var originalLink,
+      _this = this;
     e.preventDefault();
     originalLink = this.$el.find("input").val();
     if (originalLink.length === 0) {
       return;
     }
-    console.log("requesting", originalLink);
+    if (this.disabled) {
+      return;
+    }
+    this.disabled = true;
     return $.get("/api/findSong", {
       originalLink: originalLink
     }).done(function(res) {
       return window.location.href = "/song/" + res;
+    }).fail(function(res) {
+      _this.$(".search-fail").slideDown();
+      _this.disabled = false;
+      _this.$(".btn-primary").attr("disabled", "disabled");
+      return _this.$("input").on("keydown", function() {
+        _this.$(".search-fail").slideUp();
+        return _this.$(".btn-primary").removeAttr("disabled");
+      });
     });
   };
 
@@ -372,7 +388,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<!-- .home -->\n<div class='row-fluid band pinkband'>\n    <div class='row-fluid'>\n        <h4>Enter a URL for a Song:</h4>\n        <div class='row-fluid'>\n            <form class='song-url-form'>\n                <input type=\"text\"></input>\n            </form>\n            <div class='btn btn-primary btn-large' style='margin-top: 30px'>Create Link</div>\n        </div>\n    </div>\n</div>\n";
+  return "<!-- .home -->\n<div class='row-fluid band pinkband'>\n    <div class='row-fluid'>\n        <h4>Enter a URL for a Song:</h4>\n        <div class='row-fluid'>\n            <form class='song-url-form'>\n                <div class='search-fail'>\n                    Did not understand that link. Songlink supports Rdio and Spotify links.\n                </div>\n                <input type=\"text\"></input>\n            </form>\n            <div class='btn btn-primary btn-large' style='margin-top: 30px'>Create Link</div>\n        </div>\n    </div>\n</div>\n";
   });
 });
 

@@ -40,12 +40,16 @@ app.get('/api/findSong', (req, res) ->
             res.end(songId)
         )
         return
-    sidFromRdio(originalLink, (err, sid) ->
-        if err
-            res.end(500)
-            return
-        res.end(sid)
-    )
+    if originalLink.indexOf("http://rd.io/x") == 0
+        sidFromRdio(originalLink, (err, sid) ->
+            if err
+                res.end(500)
+                return
+            res.end(sid)
+        )
+        return
+    res.status(404)
+    res.end()
 )
 
 sidFromRdio = (rdioLink, callback) ->

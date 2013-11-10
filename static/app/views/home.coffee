@@ -3,6 +3,9 @@ HomeModel = require '../models/home'
 module.exports = class HomeView extends Backbone.View
     model: new HomeModel()
     template: require 'views/templates/home'
+    initialize: ->
+        @disabled = false
+
     render: ->
         @$el.html(@template())
         setTimeout( =>
@@ -19,9 +22,19 @@ module.exports = class HomeView extends Backbone.View
         originalLink = @$el.find("input").val()
         if originalLink.length is 0
             return
-        console.log "requesting", originalLink
+        return if @disabled
+        @disabled = true
         $.get("/api/findSong", originalLink: originalLink).done( (res) ->
             window.location.href = "/song/#{res}"
+        ).fail( (res) =>
+            @$(".search-fail").slideDown()
+            @disabled = false
+            @$(".btn-primary").attr("disabled", "disabled")
+            @$("input").on("keydown", =>
+                @$(".search-fail").slideUp()
+                @$(".btn-primary").removeAttr("disabled")
+            )
         )
+        
         
 
