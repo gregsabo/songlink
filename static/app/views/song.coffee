@@ -7,5 +7,12 @@ module.exports = class SongView extends Backbone.View
     render: ->
         console.log "rendering", @model.attributes
         
-        @$el.html(@template(@model.attributes))
+        ctx = _(@model.attributes).clone()
+        if ctx.rdio_track?
+            if window.iOS
+                ctx.rdio_link = ctx.rdio_track
+                    .shortUrl.replace("http:\/\/", "rdio:\/\/")
+            else
+                ctx.rdio_link = "http://rdio.com#{ctx.rdio_track.url}"
+        @$el.html(@template(ctx))
         this

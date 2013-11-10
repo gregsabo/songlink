@@ -95,6 +95,8 @@ require('lib/helpers');
 
 require('routers/main');
 
+window.iOS = Boolean(navigator.userAgent.match(/(iPad|iPhone|iPod)/g));
+
 $(function() {
   return Backbone.history.start({
     pushState: true
@@ -275,8 +277,17 @@ module.exports = SongView = (function(_super) {
   };
 
   SongView.prototype.render = function() {
+    var ctx;
     console.log("rendering", this.model.attributes);
-    this.$el.html(this.template(this.model.attributes));
+    ctx = _(this.model.attributes).clone();
+    if (ctx.rdio_track != null) {
+      if (window.iOS) {
+        ctx.rdio_link = ctx.rdio_track.shortUrl.replace("http:\/\/", "rdio:\/\/");
+      } else {
+        ctx.rdio_link = "http://rdio.com" + ctx.rdio_track.url;
+      }
+    }
+    this.$el.html(this.template(ctx));
     return this;
   };
 
@@ -293,7 +304,7 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
   
 
 
-  return "<!-- .home -->\n<div class='row-fluid band pinkband'>\n    <div class='row-fluid'>\n        <h3>Enter a URL for a Song:</h3>\n        <input type=\"text\"></input>\n        <div class='btn btn-primary btn-large' style='margin-top: 30px'>Create Link</div>\n    </div>\n</div>\n";
+  return "<!-- .home -->\n<div class='row-fluid band pinkband'>\n    <div class='row-fluid'>\n        <h4>Enter a URL for a Song:</h4>\n        <div class='row-fluid'>\n            <input type=\"text\"></input>\n            <div class='btn btn-primary btn-large' style='margin-top: 30px'>Create Link</div>\n        </div>\n    </div>\n</div>\n";
   });
 });
 
@@ -315,59 +326,61 @@ function program1(depth0,data) {
 function program3(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += "\n                    <h3>";
+  buffer += "\n                        <h3>";
   if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</h3>\n                ";
+    + "</h3>\n                    ";
   return buffer;
   }
 
 function program5(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += "\n                    <h4>by ";
+  buffer += "\n                        <h4>by ";
   if (stack1 = helpers.artist_name) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
   else { stack1 = depth0.artist_name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</h4>\n                ";
+    + "</h4>\n                    ";
   return buffer;
   }
 
 function program7(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += "\n                    <a href=\"http://rdio.com"
-    + escapeExpression(((stack1 = ((stack1 = depth0.rdio_track),stack1 == null || stack1 === false ? stack1 : stack1.url)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" class='btn btn-info rdio-open'>Open in Rdio</a>\n                ";
+  buffer += "\n                            <a href=\"";
+  if (stack1 = helpers.rdio_link) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.rdio_link; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "\" class='btn btn-info rdio-open' style='margin-bottom: 20px;'>Open in Rdio</a>\n                        ";
   return buffer;
   }
 
 function program9(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += "\n                    <a href=\""
+  buffer += "\n                            <a href=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.spotify_track),stack1 == null || stack1 === false ? stack1 : stack1.href)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" class='btn btn-success spotify-open'>Open in Spotify</a>\n                ";
+    + "\" class='btn btn-success spotify-open' style='margin-bottom: 20px'>Open in Spotify</a>\n                        ";
   return buffer;
   }
 
   buffer += "<!-- .song -->\n<div class='row-fluid band pinkband'>\n    <div class='row-fluid'>\n        ";
   stack1 = helpers['if'].call(depth0, depth0.rdio_track, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n        <div class='span6'>\n            <div class='row-fluid'>\n                ";
+  buffer += "\n        <div class='span6'>\n            <div class='row-fluid'>\n                <div class='row-fluid'>\n                    ";
   stack1 = helpers['if'].call(depth0, depth0.title, {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n                ";
+  buffer += "\n                    ";
   stack1 = helpers['if'].call(depth0, depth0.artist_name, {hash:{},inverse:self.noop,fn:self.program(5, program5, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n                ";
+  buffer += "\n                </div>\n                    <div class='row-fluid'>\n                        ";
   stack1 = helpers['if'].call(depth0, depth0.rdio_track, {hash:{},inverse:self.noop,fn:self.program(7, program7, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n                ";
+  buffer += "\n                        ";
   stack1 = helpers['if'].call(depth0, depth0.spotify_track, {hash:{},inverse:self.noop,fn:self.program(9, program9, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n            </div>\n        </div>\n    </div>\n</div>\n";
+  buffer += "\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>\n";
   return buffer;
   });
 });
