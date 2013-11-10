@@ -276,9 +276,16 @@ module.exports = SongView = (function(_super) {
     return this.model.fetch();
   };
 
+  SongView.prototype.events = {
+    "click .rdio-open": "rememberRdio",
+    "click .spotify-open": "rememberSpotify",
+    "click .forget-preference": "forgetPreference"
+  };
+
   SongView.prototype.render = function() {
-    var ctx;
-    console.log("rendering", this.model.attributes);
+    var ctx, pref,
+      _this = this;
+    pref = typeof localStorage !== "undefined" && localStorage !== null ? localStorage.SONGLINK_SERVICE_PREFERENCE : void 0;
     ctx = _(this.model.attributes).clone();
     if (ctx.rdio_track != null) {
       if (window.iOS) {
@@ -287,8 +294,59 @@ module.exports = SongView = (function(_super) {
         ctx.rdio_link = "http://rdio.com" + ctx.rdio_track.url;
       }
     }
+    ctx.redirecting = false;
+    if (this.model.get("rdio_track") && pref === "rdio") {
+      ctx.redirecting = true;
+      ctx.redirect_preference = "Rdio";
+    }
+    if (this.model.get("spotify_track") && pref === "spotify") {
+      ctx.redirecting = true;
+      ctx.redirect_preference = "Spotify";
+    }
+    if (ctx.rdio_track) {
+      ctx.album_img = ctx.rdio_track.icon400 || ctx.rdio_track.icon;
+    }
     this.$el.html(this.template(ctx));
+    if (ctx.redirecting) {
+      setTimeout(function() {
+        return _this.$(".redirect-notify").slideDown();
+      }, 1000);
+      setTimeout(function() {
+        return _this.doRedirect(ctx);
+      }, 4000);
+    }
     return this;
+  };
+
+  SongView.prototype.doRedirect = function(ctx) {
+    var pref;
+    if (localStorage.SONGLINK_SERVICE_PREFERENCE == null) {
+      return;
+    }
+    pref = localStorage.SONGLINK_SERVICE_PREFERENCE;
+    if (pref === "rdio") {
+      window.location.href = ctx.rdio_link;
+      return;
+    }
+    if (pref === "spotify") {
+      window.location.href = ctx.spotify_track.href;
+    }
+  };
+
+  SongView.prototype.rememberRdio = function() {
+    localStorage.SONGLINK_SERVICE_PREFERENCE = "rdio";
+    return true;
+  };
+
+  SongView.prototype.rememberSpotify = function() {
+    localStorage.SONGLINK_SERVICE_PREFERENCE = "spotify";
+    return true;
+  };
+
+  SongView.prototype.forgetPreference = function(e) {
+    delete localStorage.SONGLINK_SERVICE_PREFERENCE;
+    this.$(".redirect-notify").slideUp();
+    return e.preventDefault();
   };
 
   return SongView;
@@ -317,35 +375,48 @@ helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
 function program1(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += "\n            <div class='span4'>\n                <img src=\""
-    + escapeExpression(((stack1 = ((stack1 = depth0.rdio_track),stack1 == null || stack1 === false ? stack1 : stack1.icon400)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" style=''></img>\n            </div>\n        ";
+  buffer += "\n            <div class='row-fluid redirect-notify' style='margin-bottom: 30px; text-align: center; display: none;'>\n                <div class='span12'>\n                    <h3>Redirecting to ";
+  if (stack1 = helpers.redirect_preference) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.redirect_preference; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "...</h3>\n                    <h4>(<a href='#' class='forget-preference'>Forget Preference</a>)</h4>\n                </div>\n            </div>\n        ";
   return buffer;
   }
 
 function program3(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += "\n                        <h3>";
-  if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += "\n                <div class='span4'>\n                    <img src=\"";
+  if (stack1 = helpers.album_img) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.album_img; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</h3>\n                    ";
+    + "\" style=''></img>\n                </div>\n            ";
   return buffer;
   }
 
 function program5(depth0,data) {
   
   var buffer = "", stack1;
-  buffer += "\n                        <h4>by ";
-  if (stack1 = helpers.artist_name) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
-  else { stack1 = depth0.artist_name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += "\n                            <h3>";
+  if (stack1 = helpers.title) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.title; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
   buffer += escapeExpression(stack1)
-    + "</h4>\n                    ";
+    + "</h3>\n                        ";
   return buffer;
   }
 
 function program7(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n                            <h4>by ";
+  if (stack1 = helpers.artist_name) { stack1 = stack1.call(depth0, {hash:{},data:data}); }
+  else { stack1 = depth0.artist_name; stack1 = typeof stack1 === functionType ? stack1.apply(depth0) : stack1; }
+  buffer += escapeExpression(stack1)
+    + "</h4>\n                        ";
+  return buffer;
+  }
+
+function program9(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\n                            <a href=\"";
@@ -356,7 +427,7 @@ function program7(depth0,data) {
   return buffer;
   }
 
-function program9(depth0,data) {
+function program11(depth0,data) {
   
   var buffer = "", stack1;
   buffer += "\n                            <a href=\""
@@ -366,19 +437,22 @@ function program9(depth0,data) {
   }
 
   buffer += "<!-- .song -->\n<div class='row-fluid band pinkband'>\n    <div class='row-fluid'>\n        ";
-  stack1 = helpers['if'].call(depth0, depth0.rdio_track, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
+  stack1 = helpers['if'].call(depth0, depth0.redirecting, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n        <div class='span8'>\n            <div class='row-fluid'>\n                <div class='row-fluid'>\n                    ";
-  stack1 = helpers['if'].call(depth0, depth0.title, {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
+  buffer += "\n        <div class='row-fluid'>\n            ";
+  stack1 = helpers['if'].call(depth0, depth0.rdio_track, {hash:{},inverse:self.noop,fn:self.program(3, program3, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n                    ";
-  stack1 = helpers['if'].call(depth0, depth0.artist_name, {hash:{},inverse:self.noop,fn:self.program(5, program5, data),data:data});
-  if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n                </div>\n                    <div class='row-fluid'>\n                        ";
-  stack1 = helpers['if'].call(depth0, depth0.rdio_track, {hash:{},inverse:self.noop,fn:self.program(7, program7, data),data:data});
+  buffer += "\n            <div class='span8'>\n                <div class='row-fluid'>\n                    <div class='row-fluid'>\n                        ";
+  stack1 = helpers['if'].call(depth0, depth0.title, {hash:{},inverse:self.noop,fn:self.program(5, program5, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\n                        ";
-  stack1 = helpers['if'].call(depth0, depth0.spotify_track, {hash:{},inverse:self.noop,fn:self.program(9, program9, data),data:data});
+  stack1 = helpers['if'].call(depth0, depth0.artist_name, {hash:{},inverse:self.noop,fn:self.program(7, program7, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n                    </div>\n                    <div class='row-fluid'>\n                        ";
+  stack1 = helpers['if'].call(depth0, depth0.rdio_track, {hash:{},inverse:self.noop,fn:self.program(9, program9, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n                        ";
+  stack1 = helpers['if'].call(depth0, depth0.spotify_track, {hash:{},inverse:self.noop,fn:self.program(11, program11, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
   buffer += "\n                    </div>\n                </div>\n            </div>\n        </div>\n    </div>\n</div>\n";
   return buffer;

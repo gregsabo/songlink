@@ -56,6 +56,9 @@ app.get('/api/findSong', (req, res) ->
 
 app.get('/api/songInfo/:id', (req, res) ->
     sid = req.params.id
+    if sid == "undefined"
+        res.status(404)
+        return
     api_key = process.env.SONGLINK_ECHO_NEST_API_KEY
     console.log("http://developer.echonest.com/api/v4/song/profile?api_key=#{api_key}&format=json&id=#{sid}")
     request.get("http://developer.echonest.com/api/v4/song/profile?api_key=#{api_key}&format=json&id=#{sid}&bucket=tracks&bucket=id:rdio-US&bucket=id:spotify-WW", (err, song) ->

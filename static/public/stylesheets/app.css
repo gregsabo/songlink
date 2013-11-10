@@ -15612,6 +15612,12 @@ body {
   background-color: #e74c3c;
   padding-top: 0px;
 }
+.redirect-notify {
+  background-color: #34495e;
+  color: #fff;
+  border-radius: 11px;
+  padding: 10px;
+}
 .desktop {
   padding-top: 30px;
   padding-bottom: 100px;

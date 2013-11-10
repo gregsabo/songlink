@@ -1,21 +1,30 @@
 <!-- .song -->
 <div class='row-fluid band pinkband'>
     <div class='row-fluid'>
-        {{#if rdio_track }}
-            <div class='span4'>
-                <img src="{{rdio_track.icon400}}" style=''></img>
+        {{#if redirecting }}
+            <div class='row-fluid redirect-notify' style='margin-bottom: 30px; text-align: center; display: none;'>
+                <div class='span12'>
+                    <h3>Redirecting to {{redirect_preference}}...</h3>
+                    <h4>(<a href='#' class='forget-preference'>Forget Preference</a>)</h4>
+                </div>
             </div>
         {{/if}}
-        <div class='span8'>
-            <div class='row-fluid'>
-                <div class='row-fluid'>
-                    {{#if title}}
-                        <h3>{{title}}</h3>
-                    {{/if}}
-                    {{#if artist_name}}
-                        <h4>by {{artist_name}}</h4>
-                    {{/if}}
+        <div class='row-fluid'>
+            {{#if rdio_track }}
+                <div class='span4'>
+                    <img src="{{album_img}}" style=''></img>
                 </div>
+            {{/if}}
+            <div class='span8'>
+                <div class='row-fluid'>
+                    <div class='row-fluid'>
+                        {{#if title}}
+                            <h3>{{title}}</h3>
+                        {{/if}}
+                        {{#if artist_name}}
+                            <h4>by {{artist_name}}</h4>
+                        {{/if}}
+                    </div>
                     <div class='row-fluid'>
                         {{#if rdio_track}}
                             <a href="{{rdio_link}}" class='btn btn-info rdio-open' style='margin-bottom: 20px;'>Open in Rdio</a>
