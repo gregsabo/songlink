@@ -27,6 +27,19 @@ app.use (req, res, next) ->
 
 app.get('/api/findSong', (req, res) ->
     originalLink = url.parse(req.url, true).query.originalLink
+    if originalLink.indexOf("http://open.spotify") == 0
+        trackId = originalLink.match("http://open.spotify.com/track/([[a-zA-Z0-9]*)")[1]
+        console.log "using track id", trackId
+        api_key = process.env.SONGLINK_ECHO_NEST_API_KEY
+        request.get("http://developer.echonest.com/api/v4/song/profile?api_key=#{api_key}&format=json&track_id=spotify-WW:track:#{trackId}", (err, song) ->
+            if err
+                res.status(500)
+                return
+            
+            songId = JSON.parse(song.body).response.songs[0].id
+            res.end(songId)
+        )
+        return
     rdio.getTrackId(originalLink, (err, trackId) ->
         if err
             res.status(500)
