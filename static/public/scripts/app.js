@@ -308,7 +308,7 @@ function program1(depth0,data) {
   var buffer = "", stack1;
   buffer += "\n            <div class='span6'>\n                <img src=\""
     + escapeExpression(((stack1 = ((stack1 = depth0.rdio_track),stack1 == null || stack1 === false ? stack1 : stack1.icon)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" style='float: right;'></img>\n            </div>\n        ";
+    + "\" style=''></img>\n            </div>\n        ";
   return buffer;
   }
 
@@ -334,6 +334,24 @@ function program5(depth0,data) {
   return buffer;
   }
 
+function program7(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n                    <a href=\"http://rdio.com"
+    + escapeExpression(((stack1 = ((stack1 = depth0.rdio_track),stack1 == null || stack1 === false ? stack1 : stack1.url)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" class='btn btn-info rdio-open'>Open in Rdio</a>\n                ";
+  return buffer;
+  }
+
+function program9(depth0,data) {
+  
+  var buffer = "", stack1;
+  buffer += "\n                    <a href=\""
+    + escapeExpression(((stack1 = ((stack1 = depth0.spotify_track),stack1 == null || stack1 === false ? stack1 : stack1.href)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
+    + "\" class='btn btn-success spotify-open'>Open in Spotify</a>\n                ";
+  return buffer;
+  }
+
   buffer += "<!-- .song -->\n<div class='row-fluid band pinkband'>\n    <div class='row-fluid'>\n        ";
   stack1 = helpers['if'].call(depth0, depth0.rdio_track, {hash:{},inverse:self.noop,fn:self.program(1, program1, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
@@ -343,11 +361,13 @@ function program5(depth0,data) {
   buffer += "\n                ";
   stack1 = helpers['if'].call(depth0, depth0.artist_name, {hash:{},inverse:self.noop,fn:self.program(5, program5, data),data:data});
   if(stack1 || stack1 === 0) { buffer += stack1; }
-  buffer += "\n                <a href=\"http://rdio.com"
-    + escapeExpression(((stack1 = ((stack1 = depth0.rdio_track),stack1 == null || stack1 === false ? stack1 : stack1.url)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" class='btn btn-info rdio-open'>Open in Rdio</a>\n                <a href=\""
-    + escapeExpression(((stack1 = ((stack1 = depth0.spotify_track),stack1 == null || stack1 === false ? stack1 : stack1.href)),typeof stack1 === functionType ? stack1.apply(depth0) : stack1))
-    + "\" class='btn btn-success spotify-open'>Open in Spotify</a>\n            </div>\n        </div>\n    </div>\n</div>\n";
+  buffer += "\n                ";
+  stack1 = helpers['if'].call(depth0, depth0.rdio_track, {hash:{},inverse:self.noop,fn:self.program(7, program7, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n                ";
+  stack1 = helpers['if'].call(depth0, depth0.spotify_track, {hash:{},inverse:self.noop,fn:self.program(9, program9, data),data:data});
+  if(stack1 || stack1 === 0) { buffer += stack1; }
+  buffer += "\n            </div>\n        </div>\n    </div>\n</div>\n";
   return buffer;
   });
 });

@@ -89,7 +89,6 @@ app.get('/api/songInfo/:id', (req, res) ->
         Q.all([rdio_def.promise, spot_def.promise]).spread( (rdioTrack, spotifyTrack) ->
             outSong.rdio_track = rdioTrack
             outSong.spotify_track = spotifyTrack
-            console.log "ending with", outSong
             
             res.end(JSON.stringify(outSong))
         )
