@@ -1,4 +1,4 @@
-_ = require("Underscore")
+_ = require("underscore")
 Rdio = require('./contrib/rdio')
 rdio = new Rdio([process.env.RDIO_KEY, process.env.RDIO_SHARED_SECRET])
 
