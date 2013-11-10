@@ -40,17 +40,51 @@ app.get('/api/findSong', (req, res) ->
             res.end(songId)
         )
         return
-    rdio.getTrackId(originalLink, (err, trackId) ->
+    sidFromRdio(originalLink, (err, sid) ->
         if err
-            res.status(500)
+            res.end(500)
+            return
+        res.end(sid)
+    )
+)
+
+sidFromRdio = (rdioLink, callback) ->
+    rdio.getTrackId(rdioLink, (err, trackId) ->
+        if err
+            callback(500, null)
             return
         api_key = process.env.SONGLINK_ECHO_NEST_API_KEY
         request.get("http://developer.echonest.com/api/v4/song/profile?api_key=#{api_key}&format=json&track_id=#{trackId}", (err, song) ->
             if err
-                res.status(500)
+                callback(500, null)
                 return
-            res.end(JSON.parse(song.body).response.songs[0].id)
+            callback(null, JSON.parse(song.body).response.songs[0].id)
         )
+    )
+
+app.get('/api/shorten', (req, res) ->
+    originalLink = url.parse(req.url, true).query.u
+    if originalLink.indexOf("http://rd.io/x") == 0
+        sidFromRdio(originalLink, (err, sid) ->
+            proxiedLink = "http://www.songlink.biz/song/#{sid}"
+            request.post("https://www.googleapis.com/urlshortener/v1/url", json: longUrl: proxiedLink, (err, shortened) ->
+                if err
+                    res.status(500)
+                    return
+                console.log "short", shortened.body.id
+                
+                res.end(shortened.body.id)
+            )
+        )
+        return
+
+    request.post("https://www.googleapis.com/urlshortener/v1/url", json: longUrl: originalLink, (err, shortened) ->
+        if err
+            res.status(500)
+            return
+        console.log "short", shortened.body.id
+        
+        res.end(shortened.body.id)
     )
 )
 
